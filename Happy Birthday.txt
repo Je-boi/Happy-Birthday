@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Birthday Surprise 💖</title>
+  <style>
+    html, body {
+      margin:0;
+      padding:0;
+      width:100%;
+      height:100%;
+      font-family:Arial,sans-serif;
+      overflow:hidden;
+      background:white;
+    }
+
+    .screen {
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      flex-direction:column;
+      text-align:center;
+      display:none;
+    }
+
+    .active { display:flex; }
+
+    button {
+      padding:12px 25px;
+      margin:15px auto;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-size:16px;
+      background:#e74c3c;
+      color:white;
+      display:block;
+    }
+
+    .pink-bg { background:#ffe4ec url('https://i.postimg.cc/mk6MmmQy/hearts.png') repeat; background-size:100px; }
+    .jolly-bg { background:linear-gradient(45deg,#ff9a9e,#fad0c4); position:relative; }
+
+    .confetti {
+      position:absolute;
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      top:0;
+      opacity:0.9;
+      animation:fall 3s linear forwards;
+    }
+
+    @keyframes fall { to { transform:translateY(100vh) rotate(360deg); } }
+
+    .popup {
+      position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+      background:#d83c7b; color:white; padding:20px; border-radius:20px;
+      display:none; width:300px; z-index:1000;
+      text-align:center;
+    }
+
+    .popup button { background:#ff4c6d; margin-top:10px; }
+
+    .cat-container img { width:220px; display:block; margin:auto; }
+
+    /* Letter wrapper & content vertical fit */
+    .letter-wrapper {
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100%;
+      width:100%;
+    }
+
+    .letter-content {
+      width:400px;
+      height:80vh; /* taller vertically */
+      background:#fff0f5;
+      border:2px solid #e74c3c;
+      border-radius:15px;
+      padding:25px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      text-align:left;
+      font-size:16px;
+      position:relative;
+      overflow:auto;
+    }
+
+    .letter-content::before {
+      content:"";
+      position:absolute;
+      top:-15px;
+      left:50%;
+      transform:translateX(-50%);
+      width:0;
+      height:0;
+      border-left:20px solid transparent;
+      border-right:20px solid transparent;
+      border-bottom:15px solid #fff0f5;
+    }
+
+    .letter-lines { border-top:1px dashed #e74c3c; margin:5px 0; }
+
+    input { padding:10px; border-radius:10px; border:none; font-size:16px; text-align:center; width:60%; }
+  </style>
+</head>
+<body>
+
+<!-- START -->
+<div id="start" class="screen active">
+  <h2>Click this 👇</h2>
+  <button id="startBtn">CLICK ME</button>
+</div>
+
+<!-- HAPPY BDAY -->
+<div id="bday" class="screen jolly-bg">
+  <h1 style="font-size:2.5rem;">🎉 Happy Birthday Baby! 🎉</h1>
+</div>
+
+<!-- READY -->
+<div id="ready" class="screen jolly-bg">
+  <h2>Are you ready for your gift? 👀</h2>
+  <button id="readyBtn">Yes!!</button>
+</div>
+
+<!-- INTRO -->
+<div id="intro" class="screen pink-bg">
+  <h2>Before that, I prepared a small quiz for you goodluck baby!! 💗</h2>
+  <button id="gameBtn">Okay??</button>
+</div>
+
+<!-- QUIZ -->
+<div id="game" class="screen pink-bg">
+  <h2 id="qTitle"></h2>
+  <div id="qOptions"></div>
+</div>
+
+<!-- WORD -->
+<div id="word" class="screen pink-bg">
+  <h2>Guess the Word!</h2>
+  <p>Word na favorite ko ipangdescribe sa'yo that starts with M and ends in A 👀</p>
+  <input id="wordInput" placeholder="Type your guess">
+  <button id="wordBtn">Guess</button>
+</div>
+
+<!-- GIFT BUTTON BEFORE CAT -->
+<div id="giftBtnScreen" class="screen pink-bg">
+  <h2>Congratulations baby here's your gift!! 🎁</h2>
+  <button id="giftBtn">Open Gift</button>
+</div>
+
+<!-- CAT + LETTER -->
+<div id="gift" class="screen pink-bg">
+  <div id="catStage" class="cat-container">
+    <!-- GIF cat -->
+    <img src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" id="cat">
+  </div>
+  <div id="letterPrompt" class="letter-wrapper" style="display:none;">
+    <div class="letter-content" id="letter">
+      <div style="color:#e74c3c;">❤️❤️❤️</div>
+      <p>Dear Baby 💖</p>
+      <div class="letter-lines"></div>
+      <p>
+        Happy birthday love ko 😘 I hope you enjoy this little surprise I made for you. 
+        You are my favorite person and you make every day brighter. 💗
+        I love your smile, your laugh, and just you being you. Can't wait to celebrate more memories together.
+        Hope this gift makes you smile as much as you make me smile every day.
+      </p>
+      <div class="letter-lines"></div>
+      <div style="color:#e74c3c;">❤️❤️❤️</div>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP -->
+<div id="popup" class="popup">
+  <p id="popupText"></p>
+  <button id="popupBtn">Next</button>
+</div>
+
+<script>
+const screens = {
+  start: document.getElementById('start'),
+  bday: document.getElementById('bday'),
+  ready: document.getElementById('ready'),
+  intro: document.getElementById('intro'),
+  game: document.getElementById('game'),
+  word: document.getElementById('word'),
+  giftBtnScreen: document.getElementById('giftBtnScreen'),
+  gift: document.getElementById('gift')
+};
+
+function showScreen(next){
+  Object.values(screens).forEach(s => s.classList.remove('active'));
+  next.classList.add('active');
+}
+
+// CONFETTI only on Happy Birthday
+function createConfetti(container){
+  for(let i=0;i<80;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
+    c.style.animationDuration=(2+Math.random()*2)+'s';
+    container.appendChild(c);
+    setTimeout(()=>c.remove(),4000);
+  }
+}
+
+// FLOW sequential
+document.getElementById('startBtn').onclick=()=>{
+  showScreen(screens.bday);
+  createConfetti(screens.bday);
+  setTimeout(()=>showScreen(screens.ready),3000);
+};
+
+document.getElementById('readyBtn').onclick=()=>showScreen(screens.intro);
+document.getElementById('gameBtn').onclick=()=>{ showScreen(screens.game); loadQuestion(); };
+
+// QUIZ
+const questions=[
+  ["Who's birthday is it today?",["Si Tita","Kapitbahay","Hannah Rian Manuel Pascua my Loves"],2,"Yeheyyy Happy Birthday baby!! 🎉"],
+  ["Sino mas cute?",["Ikaw","Ako","Parehas (pero mas lamang ikaw)"],2,"Of course parehas pero mas lamang ka pa din 😉"],
+  ["What am I to you?",["Friend","Classmate","Favorite Person"],2,"Yeheyyy, ofc ako na 'to e great job baby!! 😍"]
+];
+
+let qIndex=0;
+
+function loadQuestion(){
+  const q=questions[qIndex];
+  document.getElementById('qTitle').textContent=q[0];
+  const box=document.getElementById('qOptions');
+  box.innerHTML='';
+
+  q[1].forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.textContent=opt;
+    btn.onclick=()=>{
+      if(i===q[2]){
+        popup(q[3],()=>{
+          qIndex++;
+          if(qIndex<questions.length) loadQuestion();
+          else showScreen(screens.word);
+        });
+      } else {
+        popup("❌ Try again baby u can do it 😘");
+      }
+    };
+    box.appendChild(btn);
+  });
+}
+
+// GUESS THE WORD
+document.getElementById('wordBtn').onclick=()=>{
+  const val=document.getElementById('wordInput').value.toLowerCase();
+  if(val==="maganda"){
+    popup("Congrats to the most maganda and cutest na nilalang sa balat ng lupa!!! 😍",()=>showScreen(screens.giftBtnScreen));
+  } else {
+    popup("Try again baby!!");
+  }
+  document.getElementById('wordInput').value='';
+};
+
+// OPEN GIFT BUTTON → CAT STAGE
+document.getElementById('giftBtn').onclick=showCatStage;
+
+// CAT + LETTER
+function showCatStage(){
+  showScreen(screens.gift);
+  const cat=document.getElementById('cat');
+  cat.style.display='block';
+  document.getElementById('letterPrompt').style.display='none';
+  setTimeout(()=>{
+    cat.style.display='none';
+    document.getElementById('letterPrompt').style.display='flex';
+  },2000); // letter appears 2s after cat
+}
+
+// POPUP
+function popup(msg,cb){
+  const p=document.getElementById('popup');
+  document.getElementById('popupText').textContent=msg;
+  p.style.display='block';
+  document.getElementById('popupBtn').onclick=()=>{
+    p.style.display='none';
+    if(cb) cb();
+  };
+};
+</script>
+
+</body>
+</html>
